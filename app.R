@@ -38,8 +38,11 @@ ui <- dashboardPage(skin = "red",
                         tabItem(tabName = "noise_readings",
                                 fluidRow(
                                   box(title = "Lastest Reading",
-                                      width = 8,
-                                      plotOutput("plt_ultimate_night_readings"))
+                                      #width = 8,
+                                      plotOutput("plt_ultimate_night_readings")),
+                                  
+                                  box(title = "All Baseline Days",
+                                      plotOutput("plt_boxplot_all"))
                                   ),
                                 ), # end of noise readings tab item
                         
@@ -63,7 +66,7 @@ server <- function(input, output) {
   set_logging_session()
   
   # data ####
-  df <- read.delim("data/20200118_to_current.XLS", sep ="\t")
+  df <- read.delim("data/20200118_to_current.txt", sep ="\t")
   #df <- subset(df, df$Unit != 'Unit')  # remove extraneous header rows
   
   # clean data, create new variables
@@ -88,7 +91,7 @@ server <- function(input, output) {
   output$plt_ultimate_night_readings <- renderPlot({
     df_ultimate <- subset(df, df$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & df$dateTime < paste(ultimate_date, "06:00:00", sep = " "))
     
-    ggplot(df_subset, aes(dateTime, Value, color = legal_limits)) +
+    ggplot(df_ultimate, aes(dateTime, Value, color = legal_limits)) +
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "orange",
