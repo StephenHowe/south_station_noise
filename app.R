@@ -12,6 +12,7 @@ library(shinydashboard)
 library(ggplot2)
 library(dplyr)
 library(shinyEventLogger)
+library(lubridate)
 
 # configurations ####
 # initialize logging
@@ -38,11 +39,14 @@ ui <- dashboardPage(skin = "red",
                         tabItem(tabName = "noise_readings",
                                 fluidRow(
                                   box(title = "Lastest Reading",
-                                      #width = 8,
+                                      #width = 4,
                                       plotOutput("plt_ultimate_night_readings")),
                                   
                                   box(title = "All Baseline Days",
-                                      plotOutput("plt_boxplot_all"))
+                                      plotOutput("plt_boxplot_all")),
+                                  
+                                  box(title = "Distribution of Noise Readings",
+                                      plotOutput("plt_density_comparison")),
                                   ),
                                 ), # end of noise readings tab item
                         
@@ -66,8 +70,7 @@ server <- function(input, output) {
   set_logging_session()
   
   # data ####
-  df <- read.delim("data/20200118_to_current.txt", sep ="\t")
-  #df <- subset(df, df$Unit != 'Unit')  # remove extraneous header rows
+  df <- read.delim("data/20200118_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
   
   # clean data, create new variables
   df$Date <- as.Date(df$Date, format = "%m/%d/%y")
@@ -81,16 +84,25 @@ server <- function(input, output) {
                             ifelse(df$col == "(50,70]",
                                    "Exceeds Nighttime Limit",
                                    "Exceeds Daytime Limit"))
+  df$time_in_hours <- lubridate::hour(df$dateTime) + lubridate::minute(df$dateTime)/60 
   
+  # filter out readings from before 11 and after 6
+  df <- subset(df, df$time_in_hours < 6 | df$time_in_hours > 23)
   
   # determine latest reading (day)
   ultimate_date <- max(df$Date)
   penultimate_date <- ultimate_date - 1
   
+  # add comparison label
+  df$comparison <- ifelse(df$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & df$dateTime < paste(ultimate_date, "06:00:00", sep = " "), "latest", "baseline")
+  
+  # data for latest evening reading
+  df_ultimate <- subset(df, df$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & df$dateTime < paste(ultimate_date, "06:00:00", sep = " "))
+
+  
+  
   # plot for last night's reading ####
   output$plt_ultimate_night_readings <- renderPlot({
-    df_ultimate <- subset(df, df$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & df$dateTime < paste(ultimate_date, "06:00:00", sep = " "))
-    
     ggplot(df_ultimate, aes(dateTime, Value, color = legal_limits)) +
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
@@ -99,14 +111,22 @@ server <- function(input, output) {
       labs(title = "Noise Monitoring of South Station (Atlantic Avenue) During the Night (11PM -  6AM)",
            subtitle = paste("Evening of", penultimate_date, "to", ultimate_date, sep = " "),
            x = "Time",
-           y = "Noise Level (dB)")
+           y = "Noise Level (dB)") +
+      theme(legend.position = "bottom")
   })
   
   # boxplot of all readings ####
   output$plt_boxplot_all <- renderPlot({
-    ggplot(df, aes(x = "", y = Value)) +
-      geom_boxplot(fill = "sky blue") +
+    ggplot(df, aes(x = "", y = Value, fill = comparison)) +
+      geom_boxplot() +
       labs(title = "Boxplot of All Noise Readings, Pre-Construction", x = "Baseline Days", y = "Noise Level (dB)")
+  })
+  
+  # density plot ####
+  output$plt_density_comparison <- renderPlot({
+    ggplot(df, aes(Value, fill = comparison)) +
+      geom_density(alpha = 0.5) +
+      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)")
   })
   
   # log sesseion ####

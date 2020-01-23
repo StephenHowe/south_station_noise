@@ -1,0 +1,7 @@
+date	note
+2020-01-17	typcial weekday night
+2020-01-18	typcial weekday night
+2020-01-19	snow and rain overnight
+2020-01-20  MLK day
+2020-01-21  typical weekday night
+2020-01-22  typical weekday night
