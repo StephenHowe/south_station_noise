@@ -1,7 +1,7 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 21 January 2020
-### Version 3
+### 22 January 2020
+### Version 2
 
 ### Version Information ####
 # 20200120 V1: initial version
@@ -70,7 +70,9 @@ server <- function(input, output) {
   set_logging_session()
   
   # data ####
-  df <- read.delim("data/20200118_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
+  df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors = FALSE)
+  df2 <- read.delim("data/20200122_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
+  df <- rbind(df1, df2)
   
   # clean data, create new variables
   df$Date <- as.Date(df$Date, format = "%m/%d/%y")
