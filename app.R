@@ -1,9 +1,11 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 22 January 2020
-### Version 2
+### 25 January 2020
+### Version 3
 
 ### Version Information ####
+# 20200125 V3: added plots based on selected date
+# 20200123 V2: added comparison plots
 # 20200120 V1: initial version
 
 # libraries ####
@@ -13,6 +15,7 @@ library(ggplot2)
 library(dplyr)
 library(shinyEventLogger)
 library(lubridate)
+library(gridExtra)
 
 # configurations ####
 # initialize logging
@@ -39,15 +42,46 @@ ui <- dashboardPage(skin = "red",
                         tabItem(tabName = "noise_readings",
                                 fluidRow(
                                   box(title = "Lastest Reading",
-                                      #width = 4,
+                                      width = 6,
                                       plotOutput("plt_ultimate_night_readings")),
                                   
-                                  box(title = "Boxplot of Noise Readings",
-                                      plotOutput("plt_boxplot_all")),
+                                  # box(title = "Boxplot of Noise Readings",
+                                  #     width = 4,
+                                  #     plotOutput("plt_boxplot_all")),
+                                  # 
+                                  # box(title = "Distribution of Noise Readings",
+                                  #     width = 4,
+                                  #     plotOutput("plt_density_comparison")),
                                   
-                                  box(title = "Distribution of Noise Readings",
-                                      plotOutput("plt_density_comparison")),
+                                  box(title = "Comparison of Latest Reading to Baseline",
+                                      width = 6,
+                                      plotOutput("plt_comparison"))
                                   ),
+                                
+                                # divider
+                                hr(style="border-color: black;"),
+                                
+                                # noise reading for selected date
+                                fluidRow(
+                                  box(title = "Select a Date",
+                                      width = 4, 
+                                      height = "125px",
+                                      selectInput("date_selection", label = "", choices = dates, width = "250px")
+                                  ),
+                                  box(title = "Instructions",
+                                      width = 8, 
+                                      height = "125px",
+                                      "Select a specific date from the drop-down menu to the left. The plots below will show the noise readings for that selected date as well as comparisons values to the baseline. The date you select indicates the date for the start of the night at 11PM.")
+                                ),
+                                
+                                fluidRow(
+                                  box(title = "Noise Reading for Specific Date",
+                                      plotOutput("plt_nr_selected")
+                                      ),
+                                  box(title = "Comparison of Specific Date to Baseline",
+                                      width = 6,
+                                      plotOutput("plt_comp_selected"))
+                                  )
                                 ), # end of noise readings tab item
                         
                         # information body panel ####
@@ -100,8 +134,6 @@ server <- function(input, output) {
   
   # data for latest evening reading
   df_ultimate <- subset(df, df$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & df$dateTime < paste(ultimate_date, "06:00:00", sep = " "))
-
-  
   
   # plot for last night's reading ####
   output$plt_ultimate_night_readings <- renderPlot({
@@ -117,22 +149,82 @@ server <- function(input, output) {
       theme(legend.position = "bottom")
   })
   
-  # boxplot of all readings ####
-  output$plt_boxplot_all <- renderPlot({
-    ggplot(df, aes(x = "", y = Value, fill = comparison)) +
+  # # boxplot of all readings ####
+  # output$plt_boxplot_all <- renderPlot({
+  #   ggplot(df, aes(x = "", y = Value, fill = comparison)) +
+  #     geom_boxplot() +
+  #     labs(title = "Comparison of All Nights (Baseline) and Latest Reading", y = "Noise Level (dB)", fill="Group") +
+  #     theme(legend.position = "bottom")
+  # })
+  # 
+  # # density plot ####
+  # output$plt_density_comparison <- renderPlot({
+  #   ggplot(df, aes(Value, fill = comparison)) +
+  #     geom_density(alpha = 0.5) +
+  #     labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group")
+  # })
+  
+  # combined comparison plots
+  output$plt_comparison <- renderPlot({
+    pa <- ggplot(df, aes(x = "", y = Value, fill = comparison)) +
       geom_boxplot() +
-      labs(title = "Comparison of All Nights (Baseline) and Latest Reading", y = "Noise Level (dB)", fill="Group") +
+      labs(title = "Boxplot of Noise Readings", y = "Noise Level (dB)", fill="Group") +
+      theme(legend.position = "bottom")
+    
+    pb <- ggplot(df, aes(Value, fill = comparison)) +
+      geom_density(alpha = 0.5) +
+      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group") +
+      theme(legend.position = "bottom")
+    
+    grid.arrange(pa, pb, nrow = 1)
+  })
+  
+  # Select a date ####
+  # define list of dates for drop-down
+  dates <- unique(df$Date)
+  dates <- sort(dates, decreasing = TRUE)
+  dates <- dates[-1]
+  
+  # plots for selected date
+  output$plt_nr_selected <- renderPlot({
+    selected_start <- as.Date(input$date_selection)
+    selected_end <- selected_start + 1
+    
+    df_selected <- subset(df, df$dateTime > paste(selected_start, "23:00:00", sep = " ") & df$dateTime < paste(selected_end, "06:00:00", sep = " "))
+    
+    ggplot(df_selected, aes(dateTime, Value, color = legal_limits)) +
+      geom_point() +
+      scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
+                                                            "Exceeds Nighttime Limit" = "orange",
+                                                            "Exceeds Daytime Limit" = "red")) +
+      labs(title = "Noise Monitoring of South Station (Atlantic Avenue) During the Night (11PM -  6AM)",
+           subtitle = paste("Evening of", selected_start, "to", selected_end, sep = " "),
+           x = "Time",
+           y = "Noise Level (dB)") +
       theme(legend.position = "bottom")
   })
   
-  # density plot ####
-  output$plt_density_comparison <- renderPlot({
-    ggplot(df, aes(Value, fill = comparison)) +
+  output$plt_comp_selected <- renderPlot({
+    selected_start <- as.Date(input$date_selection)
+    selected_end <- selected_start + 1
+    
+    df$selected <- ifelse(df$dateTime > paste(selected_start, "23:00:00", sep = " ") & df$dateTime < paste(selected_end, "06:00:00", sep = " "), "selected", "baseline")
+    
+    
+    p3 <- ggplot(df, aes(x = "", y = Value, fill = selected)) +
+      geom_boxplot() +
+      labs(title = "Boxplot of Noise Readings", y = "Noise Level (dB)", fill="Group") +
+      theme(legend.position = "bottom")
+    
+    p4 <- ggplot(df, aes(Value, fill = selected)) +
       geom_density(alpha = 0.5) +
-      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group")
+      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group") +
+      theme(legend.position = "bottom")
+    
+    grid.arrange(p3, p4, nrow = 1)
   })
   
-  # log sesseion ####
+  # log session ####
   log_event("Dashboard session started")
   
 } #end of server functions
