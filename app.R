@@ -42,7 +42,7 @@ ui <- dashboardPage(skin = "red",
                                       #width = 4,
                                       plotOutput("plt_ultimate_night_readings")),
                                   
-                                  box(title = "All Baseline Days",
+                                  box(title = "Boxplot of Noise Readings",
                                       plotOutput("plt_boxplot_all")),
                                   
                                   box(title = "Distribution of Noise Readings",
@@ -121,14 +121,15 @@ server <- function(input, output) {
   output$plt_boxplot_all <- renderPlot({
     ggplot(df, aes(x = "", y = Value, fill = comparison)) +
       geom_boxplot() +
-      labs(title = "Boxplot of All Noise Readings, Pre-Construction", x = "Baseline Days", y = "Noise Level (dB)")
+      labs(title = "Comparison of All Nights (Baseline) and Latest Reading", y = "Noise Level (dB)", fill="Group") +
+      theme(legend.position = "bottom")
   })
   
   # density plot ####
   output$plt_density_comparison <- renderPlot({
     ggplot(df, aes(Value, fill = comparison)) +
       geom_density(alpha = 0.5) +
-      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)")
+      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group")
   })
   
   # log sesseion ####
