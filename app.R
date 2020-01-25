@@ -23,6 +23,7 @@ set_logging(file=TRUE)
 
 # Define UI for application ----
 ui <- dashboardPage(skin = "red",
+                    
                     # set dashboard header ####
                     dashboardHeader(title = "South Station Noise"),
                     
@@ -36,6 +37,13 @@ ui <- dashboardPage(skin = "red",
                     
                     #create main body panels ####
                     dashboardBody(
+                      
+                      
+                      # hide error messages in UI
+                      tags$style(type="text/css",
+                                 ".shiny-output-error { visibility: hidden; }",
+                                 ".shiny-output-error:before { visibility: hidden; }"
+                      ),
                       
                       tabItems(
                         # noise readings body panel ####
@@ -66,7 +74,7 @@ ui <- dashboardPage(skin = "red",
                                   box(title = "Select a Date",
                                       width = 4, 
                                       height = "125px",
-                                      selectInput("date_selection", label = "", choices = dates, width = "250px")
+                                      selectInput("date_list", label = "", choices = "", width = "250px")
                                   ),
                                   box(title = "Instructions",
                                       width = 8, 
@@ -99,7 +107,7 @@ ui <- dashboardPage(skin = "red",
 
 
 # Define server logic ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   # initialize event logging
   set_logging_session()
   
@@ -142,7 +150,7 @@ server <- function(input, output) {
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "orange",
                                                             "Exceeds Daytime Limit" = "red")) +
-      labs(title = "Noise Monitoring of South Station (Atlantic Avenue) During the Night (11PM -  6AM)",
+      labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Night (11PM -  6AM)",
            subtitle = paste("Evening of", penultimate_date, "to", ultimate_date, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
@@ -185,9 +193,12 @@ server <- function(input, output) {
   dates <- sort(dates, decreasing = TRUE)
   dates <- dates[-1]
   
+  updateSelectInput(session, "date_list", choices = dates)
+  
   # plots for selected date
   output$plt_nr_selected <- renderPlot({
-    selected_start <- as.Date(input$date_selection)
+    
+    selected_start <- as.Date(input$date_list)
     selected_end <- selected_start + 1
     
     df_selected <- subset(df, df$dateTime > paste(selected_start, "23:00:00", sep = " ") & df$dateTime < paste(selected_end, "06:00:00", sep = " "))
@@ -197,7 +208,7 @@ server <- function(input, output) {
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "orange",
                                                             "Exceeds Daytime Limit" = "red")) +
-      labs(title = "Noise Monitoring of South Station (Atlantic Avenue) During the Night (11PM -  6AM)",
+      labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Night (11PM -  6AM)",
            subtitle = paste("Evening of", selected_start, "to", selected_end, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
@@ -205,7 +216,7 @@ server <- function(input, output) {
   })
   
   output$plt_comp_selected <- renderPlot({
-    selected_start <- as.Date(input$date_selection)
+    selected_start <- as.Date(input$date_list)
     selected_end <- selected_start + 1
     
     df$selected <- ifelse(df$dateTime > paste(selected_start, "23:00:00", sep = " ") & df$dateTime < paste(selected_end, "06:00:00", sep = " "), "selected", "baseline")
