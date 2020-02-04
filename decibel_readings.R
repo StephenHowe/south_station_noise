@@ -2,7 +2,7 @@ library(readxl)
 library(ggplot2)
 library(dplyr)
 
-df <- read.delim("data/20200118.XLS", sep ="\t")
+df <- read.delim("data/20200119.XLS", sep ="\t")
 #df <- read_xlsx("data/20200118.xlsx")
 df$dateTime <- as.character(paste(df$Date, df$Time, sep = " "))
 df$dateTime <- strptime(df$dateTime, format = "%Y/%m/%d %H:%M:%S")
@@ -49,7 +49,7 @@ df$legal_limits <- ifelse(df$col == "(30,50]",
                                  "Exceeds Nighttime Limit",
                                  "Exceeds Daytime Limit"))
 
-df_subset <- subset(df, df$dateTime > "2020-01-17 23:00:00" & df$dateTime < "2020-01-18 07:0:0")
+df_subset <- subset(df, df$dateTime > "2020-01-18 23:00:00" & df$dateTime < "2020-01-19 07:0:0")
 
 ggplot(df_subset, aes(dateTime, Value, color = legal_limits)) +
   geom_point() +
@@ -60,10 +60,8 @@ ggplot(df_subset, aes(dateTime, Value, color = legal_limits)) +
        x = "Date and Time",
        y = "Noise Level (dB)")
 
-# gussying up the plot
 
+# create text file for notes
+notes <- data.frame("date" = "2020-01-17", "note" = "typcial weekday night", stringsAsFactors = FALSE)
 
-
-ggplot(df, aes(dateTime, Value, color = col)) +
-  geom_point() +
-  scale_colour_manual(name = "Legal Limits", values = c("(30,50]" = "dark blue", "(50,70]" = "orange", "(70,130]" = "red"))
+write.csv(notes, "data/notes.txt", sep = "\t")
