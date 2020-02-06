@@ -1,9 +1,10 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 4 February 2020
-### Version 4
+### 5 February 2020
+### Version 5
 
 ### Version Information ####
+# 20200205 V5: reading data from git
 # 20200204 V4: added daytime readings panel
 # 20200125 V3: added plots based on selected date
 # 20200123 V2: added comparison plots
@@ -150,10 +151,11 @@ server <- function(input, output, session) {
   set_logging_session()
   
   # data ####
-  df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors = FALSE)
-  df2 <- read.delim("data/20200122_to_20200204.txt", sep ="\t", stringsAsFactors = FALSE)
-  df3 <- read.delim("data/20200204_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
-  df <- rbind(df1, df2, df3)
+  # df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors = FALSE)
+  # df2 <- read.delim("data/20200122_to_20200204.txt", sep ="\t", stringsAsFactors = FALSE)
+  # df3 <- read.delim("data/20200204_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
+  # df <- rbind(df1, df2, df3)
+  df <- read.csv("https://raw.githubusercontent.com/StephenHowe/south_station_noise/master/data/all_readings.csv", stringsAsFactors = FALSE)
   
   #TODO change df assignment to a readRDS on git; move df1, 2, 3 to separate script; move all the clean-up down below, too
   
@@ -162,7 +164,7 @@ server <- function(input, output, session) {
   df$dateTime <- as.character(paste(df$Date, df$Time, sep = " "))
   df$dateTime <- strptime(df$dateTime, format = "%Y-%m-%d %H:%M:%S")  # may have to fiddle with this
   df$dateTime <- as.POSIXct(df$dateTime)
-  df$Value <- as.numeric(df$Value)
+  #df$Value <- as.numeric(df$Value)
   df$col <- cut(df$Value, c(30,50,70,130))
   df$legal_limits <- ifelse(df$col == "(30,50]",
                             "Acceptable Level",
