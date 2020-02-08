@@ -1,9 +1,10 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 5 February 2020
-### Version 5
+### 8 February 2020
+### Version 6
 
 ### Version Information ####
+# 20200208 V6: changed color scheme for daytime reading panel
 # 20200205 V5: reading data from git
 # 20200204 V4: added daytime readings panel
 # 20200125 V3: added plots based on selected date
@@ -18,6 +19,7 @@ library(dplyr)
 library(shinyEventLogger)
 library(lubridate)
 library(gridExtra)
+library(shinycssloaders)
 
 # configurations ####
 # initialize logging
@@ -55,11 +57,11 @@ ui <- dashboardPage(skin = "red",
                                 fluidRow(
                                   box(title = "Lastest Reading",
                                       width = 6,
-                                      plotOutput("plt_ultimate_night_readings")),
+                                      plotOutput("plt_ultimate_night_readings") %>% withSpinner(color="#DD4B39")),
                                   
                                   box(title = "Comparison of Latest Reading to Baseline",
                                       width = 6,
-                                      plotOutput("plt_comparison"))
+                                      plotOutput("plt_comparison") %>% withSpinner(color="#DD4B39"))
                                   ),
                                 
                                 # divider
@@ -80,11 +82,10 @@ ui <- dashboardPage(skin = "red",
                                 
                                 fluidRow(
                                   box(title = "Noise Reading for Specific Date",
-                                      plotOutput("plt_nr_selected")
-                                      ),
+                                      plotOutput("plt_nr_selected") %>% withSpinner(color="#DD4B39")),
                                   box(title = "Comparison of Specific Date to Baseline",
                                       width = 6,
-                                      plotOutput("plt_comp_selected"))
+                                      plotOutput("plt_comp_selected") %>% withSpinner(color="#DD4B39"))
                                   )
                                 ), # end of nighttime readings tab item
                         
@@ -93,11 +94,11 @@ ui <- dashboardPage(skin = "red",
                                 fluidRow(
                                   box(title = "Lastest Reading",
                                       width = 6,
-                                      plotOutput("plt_ultimate_day_readings")),
+                                      plotOutput("plt_ultimate_day_readings") %>% withSpinner(color="#DD4B39")),
                                   
                                   box(title = "Comparison of Latest Reading to Baseline",
                                       width = 6,
-                                      plotOutput("plt_comparison_day"))
+                                      plotOutput("plt_comparison_day") %>% withSpinner(color="#DD4B39"))
                                 ),
                                 
                                 # divider
@@ -118,11 +119,10 @@ ui <- dashboardPage(skin = "red",
                                 
                                 fluidRow(
                                   box(title = "Noise Reading for Specific Date",
-                                      plotOutput("plt_nr_selected_day")
-                                  ),
+                                      plotOutput("plt_nr_selected_day") %>% withSpinner(color="#DD4B39")),
                                   box(title = "Comparison of Specific Date to Baseline",
                                       width = 6,
-                                      plotOutput("plt_comp_selected_day"))
+                                      plotOutput("plt_comp_selected_day") %>% withSpinner(color="#DD4B39"))
                                 )
                         ), # end of dayttime readings tab item
                         
@@ -130,14 +130,19 @@ ui <- dashboardPage(skin = "red",
                         tabItem(tabName = "information",
                                 fluidRow(
                                   box(title = "Overview",
-                                      "This dashboard was created to monitor the noise resulting from the South Station Air Rights construction project. It is anticipated that noise levels will exceed the legal limits set by the City of Boston. This dashboard displays measurements of noise levels (dB) taken directly across Atlantic Avenue from the construction site. Since the greatest concern with noise lies with the planned night-time construction, this dashboard displays decibel readings taken between 11PM and 6AM."),
+                                      "This dashboard was created to monitor the noise resulting from the South Station Air Rights construction project. It is anticipated that noise levels will exceed the legal limits set by the City of Boston. This dashboard displays measurements of noise levels (dB) taken directly across Atlantic Avenue from the construction site. Since the greatest concern with noise lies with the planned night-time construction, this dashboard displays decibel readings taken between 11PM and 6AM. A separate page on the dashboard displays daytime readings, from 8AM to 5 PM."),
                                   box(title="Methodology",
                                       "The data for this dashboard was recorded using a Reed Instruments SD-4023 Sound Level Meter datalogger. Meausurements were taken every five seconds between 11PM and 6AM each night. The decibel meter is positioned in a residential building directly across from South Station. The monitor was placed direcly inside the window of a residential unit in order to best measure the sound entering residents' living space.")
                                 ),
                                 
                                 fluidRow(
                                   box(title = "Information",
-                                      "App Version: 4 | February 4, 2020 | Created by howetowork at gmail dot com")
+                                      "App Version: 6",
+                                      tags$br(),
+                                      "February 8, 2020",
+                                      tags$br(),
+                                      "Created by howetowork at gmail dot com"
+                                      )
                                 )
                         ) # end of information tab item
                       ) # end of tab items
@@ -151,13 +156,7 @@ server <- function(input, output, session) {
   set_logging_session()
   
   # data ####
-  # df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors = FALSE)
-  # df2 <- read.delim("data/20200122_to_20200204.txt", sep ="\t", stringsAsFactors = FALSE)
-  # df3 <- read.delim("data/20200204_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
-  # df <- rbind(df1, df2, df3)
   df <- read.csv("https://raw.githubusercontent.com/StephenHowe/south_station_noise/master/data/all_readings.csv", stringsAsFactors = FALSE)
-  
-  #TODO change df assignment to a readRDS on git; move df1, 2, 3 to separate script; move all the clean-up down below, too
   
   # clean data, create new variables
   df$Date <- as.Date(df$Date, format = "%m/%d/%y")
@@ -166,18 +165,23 @@ server <- function(input, output, session) {
   df$dateTime <- as.POSIXct(df$dateTime)
   #df$Value <- as.numeric(df$Value)
   df$col <- cut(df$Value, c(30,50,70,130))
-  df$legal_limits <- ifelse(df$col == "(30,50]",
-                            "Acceptable Level",
-                            ifelse(df$col == "(50,70]",
-                                   "Exceeds Nighttime Limit",
-                                   "Exceeds Daytime Limit"))
   df$time_in_hours <- lubridate::hour(df$dateTime) + lubridate::minute(df$dateTime)/60 
   
   # filter out readings from before 11 and after 6
   dfn <- subset(df, df$time_in_hours < 6 | df$time_in_hours > 23)
   dfd <- subset(df, df$time_in_hours > 8 & df$time_in_hours < 17)
   
-  #TODO stop here for data file
+  # apply legal limit label
+  dfn$legal_limits <- ifelse(dfn$col == "(30,50]",
+                            "Acceptable Level",
+                            ifelse(dfn$col == "(50,70]",
+                                   "Exceeds Nighttime Limit",
+                                   "Exceeds Daytime Limit"))
+  
+  dfd$legal_limits <- ifelse(dfd$col == "(70,130]",
+                            "Exceeds Daytime Limit",
+                            "Acceptable Level")
+
   
   # nighttime readings ####
   
