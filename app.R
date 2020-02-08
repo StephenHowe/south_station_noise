@@ -274,11 +274,13 @@ server <- function(input, output, session) {
   
   # daytime readings ####
   
+  ultimate_date_d <- max(dfd$Date)
+  
   # add comparison label
-  dfd$comparison <- ifelse(dfd$dateTime > paste(ultimate_date, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date, "17:00:00", sep = " "), "latest", "baseline")
+  dfd$comparison <- ifelse(dfd$dateTime > paste(ultimate_date_d, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date_d, "17:00:00", sep = " "), "latest", "baseline")
   
   # data for latest evening reading
-  dfd_ultimate <- subset(dfd, dfd$dateTime > paste(ultimate_date, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date, "17:00:00", sep = " "))
+  dfd_ultimate <- subset(dfd, dfd$dateTime > paste(ultimate_date_d, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date_d, "17:00:00", sep = " "))
   
   # plot for last days's reading ####
   output$plt_ultimate_day_readings <- renderPlot({
@@ -313,7 +315,6 @@ server <- function(input, output, session) {
   # define list of dates for drop-down
   dates_day <- unique(dfd$Date)
   dates_day <- sort(dates_day, decreasing = TRUE)
-  #dates_day <- dates_day[-1]
   
   updateSelectInput(session, "date_list_day", choices = dates_day)
   
