@@ -14,8 +14,9 @@ df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors =
 df2 <- read.delim("data/20200122_to_20200204.txt", sep ="\t", stringsAsFactors = FALSE)
 df3 <- read.delim("data/20200204_to_20200206.txt", sep ="\t", stringsAsFactors = FALSE)
 df4 <- read.delim("data/20200206_to_20200209.txt", sep ="\t", stringsAsFactors = FALSE)
-df5 <- read.delim("data/20200209_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
-df <- rbind(df1, df2, df3, df4, df5)
+df5 <- read.delim("data/20200209_to_20200212.txt", sep ="\t", stringsAsFactors = FALSE)
+df6 <- read.delim("data/20200212_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
+df <- rbind(df1, df2, df3, df4, df5, df6)
 
 # # clean data, create new variables
 # df$Date <- as.Date(df$Date, format = "%m/%d/%y")
