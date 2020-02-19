@@ -163,7 +163,7 @@ server <- function(input, output, session) {
   df$dateTime <- as.character(paste(df$Date, df$Time, sep = " "))
   df$dateTime <- strptime(df$dateTime, format = "%Y-%m-%d %H:%M:%S")  # may have to fiddle with this
   df$dateTime <- as.POSIXct(df$dateTime)
-  #df$Value <- as.numeric(df$Value)
+  df$Value <- as.numeric(df$Value)
   df$col <- cut(df$Value, c(30,50,70,130))
   df$time_in_hours <- lubridate::hour(df$dateTime) + lubridate::minute(df$dateTime)/60 
   
