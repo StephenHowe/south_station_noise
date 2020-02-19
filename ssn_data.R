@@ -1,13 +1,14 @@
 ### South Station Noise Monitoring Data
 ### Stephen howe
-### 4 February 2020
-### Version 1
+### 18 February 2020
+### Version 2
 
 # Version history ####
+# 20200218 V2: introduced feather; subsetted data prior creating all_readings files
 # 20200204 V1: initial script
 
 # libraries ####
-#library(RCurl)
+library(feather)
 
 # load data ####
 df1 <- read.delim("data/20200118_to_20200122.txt", sep ="\t", stringsAsFactors = FALSE)
@@ -19,26 +20,15 @@ df6 <- read.delim("data/20200212_to_20200214.txt", sep ="\t", stringsAsFactors =
 df7 <- read.delim("data/20200214_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
 df <- rbind(df1, df2, df3, df4, df5, df6, df7)
 
-# # clean data, create new variables
-# df$Date <- as.Date(df$Date, format = "%m/%d/%y")
-# df$dateTime <- as.character(paste(df$Date, df$Time, sep = " "))
-# df$dateTime <- strptime(df$dateTime, format = "%Y-%m-%d %H:%M:%S")  # may have to fiddle with this€€‹
-# df$dateTime <- as.POSIXct(df$dateTime)
-# df$Value <- as.numeric(df$Value)
-# df$col <- cut(df$Value, c(30,50,70,130))
-# df$legal_limits <- ifelse(df$col == "(30,50]",
-#                           "Acceptable Level",
-#                           ifelse(df$col == "(50,70]",
-#                                  "Exceeds Nighttime Limit",
-#                                  "Exceeds Daytime Limit"))
-# df$time_in_hours <- lubridate::hour(df$dateTime) + lubridate::minute(df$dateTime)/60 
-# 
-# # subset into day and night
-# dfn <- subset(df, df$time_in_hours < 6 | df$time_in_hours > 23)
-# dfd <- subset(df, df$time_in_hours > 8 & df$time_in_hours < 17)
+# remove data outside target time ranges
+df$time_in_hours <- strptime(df$Time, format = "%H:%M:%S")
+df$time_in_hours <- lubridate::hour(df$time_in_hours) + lubridate::minute(df$time_in_hours)/60 
+df <- subset(df, df$time_in_hours < 6 | df$time_in_hours > 8) # remove morning window between 6AM - 8AM
+df <- subset(df, df$time_in_hours < 17 | df$time_in_hours > 23) # remove evening window between 5PM - 11PM
+df <- df[-6]
 
 # write data to file ####
-#saveRDS(dfn, "data/nighttime_readings")
+write_feather(df, "data/all_readings.feather")
 write.csv(df, "data/all_readings.csv",
           row.names = FALSE,
           quote = TRUE)
