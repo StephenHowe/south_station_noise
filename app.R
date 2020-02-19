@@ -1,9 +1,10 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 8 February 2020
-### Version 6
+### 18 February 2020
+### Version 7
 
 ### Version Information ####
+# 20200218 V7: bug fixes
 # 20200208 V6: changed color scheme for daytime reading panel
 # 20200205 V5: reading data from git
 # 20200204 V4: added daytime readings panel
@@ -290,7 +291,7 @@ server <- function(input, output, session) {
                                                             "Exceeds Nighttime Limit" = "light blue",
                                                             "Exceeds Daytime Limit" = "orange")) +
       labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Day (8AM - 5PM)",
-           subtitle = paste("Day of", penultimate_date, sep = " "),
+           subtitle = paste("Day of", ultimate_date_d, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
       theme(legend.position = "bottom")
