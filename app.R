@@ -1,9 +1,10 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
 ### 18 February 2020
-### Version 7
+### Version 8
 
 ### Version Information ####
+# 20200218 V8: Introduced Feather (still using remote CSV)
 # 20200218 V7: bug fixes
 # 20200208 V6: changed color scheme for daytime reading panel
 # 20200205 V5: reading data from git
@@ -21,6 +22,7 @@ library(shinyEventLogger)
 library(lubridate)
 library(gridExtra)
 library(shinycssloaders)
+library(feather)
 
 # configurations ####
 # initialize logging
@@ -158,6 +160,8 @@ server <- function(input, output, session) {
   
   # data ####
   df <- read.csv("https://raw.githubusercontent.com/StephenHowe/south_station_noise/master/data/all_readings.csv", stringsAsFactors = FALSE)
+  #df <- read.csv("data/all_readings.csv", stringsAsFactors = FALSE)
+  #df <- read_feather("data/all_readings.feather")
   
   # clean data, create new variables
   df$Date <- as.Date(df$Date, format = "%m/%d/%y")
