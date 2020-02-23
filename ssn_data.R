@@ -18,8 +18,9 @@ df4 <- read.delim("data/20200206_to_20200209.txt", sep ="\t", stringsAsFactors =
 df5 <- read.delim("data/20200209_to_20200212.txt", sep ="\t", stringsAsFactors = FALSE)
 df6 <- read.delim("data/20200212_to_20200214.txt", sep ="\t", stringsAsFactors = FALSE)
 df7 <- read.delim("data/20200214_to_20200219.txt", sep ="\t", stringsAsFactors = FALSE)
-df8 <- read.delim("data/20200219_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
-df <- rbind(df1, df2, df3, df4, df5, df6, df7, df8)
+df8 <- read.delim("data/20200219_to_20200221.txt", sep ="\t", stringsAsFactors = FALSE)
+df9 <- read.delim("data/20200221_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
+df <- rbind(df1, df2, df3, df4, df5, df6, df7, df8, df9)
 
 # remove data outside target time ranges
 df$time_in_hours <- strptime(df$Time, format = "%H:%M:%S")
