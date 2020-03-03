@@ -1,9 +1,10 @@
 ### South Station Noise Monitoring
 ### Stephen Howe
-### 18 February 2020
-### Version 8
+### 2 March 2020
+### Version 9
 
 ### Version Information ####
+# 20200302 V9: Added L10 line to each graph!
 # 20200218 V8: Introduced Feather (still using remote CSV)
 # 20200218 V7: bug fixes
 # 20200208 V6: changed color scheme for daytime reading panel
@@ -23,6 +24,7 @@ library(lubridate)
 library(gridExtra)
 library(shinycssloaders)
 library(feather)
+library(caTools)
 
 # configurations ####
 # initialize logging
@@ -200,18 +202,23 @@ server <- function(input, output, session) {
   # data for latest evening reading
   df_ultimate <- subset(dfn, dfn$dateTime > paste(penultimate_date, "23:00:00", sep = " ") & dfn$dateTime < paste(ultimate_date, "06:00:00", sep = " "))
   
+  # add L10 to latest evening reading
+  df_ultimate$L10 <- runquantile(df_ultimate$Value, k=120, probs = .9, endrule = "NA", align = "center")
+  
   # plot for last night's reading ####
   output$plt_ultimate_night_readings <- renderPlot({
     ggplot(df_ultimate, aes(dateTime, Value, color = legal_limits)) +
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "orange",
-                                                            "Exceeds Daytime Limit" = "red")) +
+                                                            "Exceeds Daytime Limit" = "red",
+                                                            "L10" = "green")) +
       labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Night (11PM -  6AM)",
            subtitle = paste("Evening of", penultimate_date, "to", ultimate_date, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
-      theme(legend.position = "bottom")
+      theme(legend.position = "bottom") +
+      geom_line(aes(dateTime, L10, color = "L10"))
   })
   
   # combined comparison plots
@@ -245,16 +252,21 @@ server <- function(input, output, session) {
     
     df_selected <- subset(dfn, dfn$dateTime > paste(selected_start, "23:00:00", sep = " ") & dfn$dateTime < paste(selected_end, "06:00:00", sep = " "))
     
+    # add L10 to selected data
+    df_selected$L10 <- runquantile(df_selected$Value, k=120, probs = .9, endrule = "NA", align = "center")
+    
     ggplot(df_selected, aes(dateTime, Value, color = legal_limits)) +
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "orange",
-                                                            "Exceeds Daytime Limit" = "red")) +
+                                                            "Exceeds Daytime Limit" = "red",
+                                                            "L10" = "green")) +
       labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Night (11PM -  6AM)",
            subtitle = paste("Evening of", selected_start, "to", selected_end, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
-      theme(legend.position = "bottom")
+      theme(legend.position = "bottom") +
+      geom_line(aes(dateTime, L10, color = "L10"))
   })
   
   output$plt_comp_selected <- renderPlot({
@@ -284,8 +296,11 @@ server <- function(input, output, session) {
   # add comparison label
   dfd$comparison <- ifelse(dfd$dateTime > paste(ultimate_date_d, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date_d, "17:00:00", sep = " "), "latest", "baseline")
   
-  # data for latest evening reading
+  # data for latest daytime reading
   dfd_ultimate <- subset(dfd, dfd$dateTime > paste(ultimate_date_d, "08:00:00", sep = " ") & dfd$dateTime < paste(ultimate_date_d, "17:00:00", sep = " "))
+  
+  # add L10 to latest daytime data
+  dfd_ultimate$L10 <- runquantile(dfd_ultimate$Value, k=120, probs = .9, endrule = "NA", align = "center")
   
   # plot for last days's reading ####
   output$plt_ultimate_day_readings <- renderPlot({
@@ -293,12 +308,14 @@ server <- function(input, output, session) {
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "light blue",
-                                                            "Exceeds Daytime Limit" = "orange")) +
+                                                            "Exceeds Daytime Limit" = "orange",
+                                                            "L10" = "green")) +
       labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Day (8AM - 5PM)",
            subtitle = paste("Day of", ultimate_date_d, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
-      theme(legend.position = "bottom")
+      theme(legend.position = "bottom") +
+      geom_line(aes(dateTime, L10, color = "L10"))
   })
   
   # combined comparison plots
@@ -331,16 +348,22 @@ server <- function(input, output, session) {
     
     df_selected_day <- subset(dfd, dfd$dateTime > paste(selected_start_day, "08:00:00", sep = " ") & dfd$dateTime < paste(selected_start_day, "17:00:00", sep = " "))
     
+    # add L10 to selected daytime data
+    df_selected_day$L10 <- runquantile(df_selected_day$Value, k=120, probs = .9, endrule = "NA", align = "center")
+    
+    
     ggplot(df_selected_day, aes(dateTime, Value, color = legal_limits)) +
       geom_point() +
       scale_colour_manual(name = "Legal Limits", values = c("Acceptable Level" = "dark blue", 
                                                             "Exceeds Nighttime Limit" = "light blue",
-                                                            "Exceeds Daytime Limit" = "orange")) +
+                                                            "Exceeds Daytime Limit" = "orange",
+                                                            "L10" = "green")) +
       labs(title = "Noise Monitoring of South Station (Atlantic Ave) During the Day (8AM - 5PM)",
            subtitle = paste("Day of", selected_start_day, sep = " "),
            x = "Time",
            y = "Noise Level (dB)") +
-      theme(legend.position = "bottom")
+      theme(legend.position = "bottom") +
+      geom_line(aes(dateTime, L10, color = "L10"))
   })
   
   output$plt_comp_selected_day <- renderPlot({
