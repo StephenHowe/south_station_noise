@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+scratch.R
+/data/old_data
+events.log
+/rsconnect
