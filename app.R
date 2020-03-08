@@ -15,7 +15,7 @@
 # 20200120 V1: initial version
 
 # libraries ####
-library(shiny)
+library(shiny)q
 library(shinydashboard)
 library(ggplot2)
 library(dplyr)
