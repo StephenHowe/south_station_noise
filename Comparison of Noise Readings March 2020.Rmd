@@ -1,0 +1,154 @@
+---
+title: "Comparison of Noise Readings - March 2020"
+author: "Stephen Howe"
+date: "3/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(caTools)
+library(gridExtra)
+
+# data ####
+  df <- read.csv("data/all_readings.csv", stringsAsFactors = FALSE)
+  
+  # clean data, create new variables
+  df$Date <- as.Date(df$Date, format = "%m/%d/%y")
+  df$dateTime <- as.character(paste(df$Date, df$Time, sep = " "))
+  df$dateTime <- strptime(df$dateTime, format = "%Y-%m-%d %H:%M:%S")  # may have to fiddle with this
+  df$dateTime <- as.POSIXct(df$dateTime)
+  df$Value <- as.numeric(df$Value)
+  df$col <- cut(df$Value, c(30,50,70,130))
+  df$time_in_hours <- lubridate::hour(df$dateTime) + lubridate::minute(df$dateTime)/60 
+```
+
+## Sound Level Readings - March 10 - 13, 2020
+
+The following plots show the sound level readings for the following nights:
+
+* Monday (3/9) - Tuesday (3/10)
+* Tuesday (3/10) - Wednesday (3/11)
+* Wednesday (3/11) - Thursday (3/12)
+* Thursday (3/12) - Friday (3/13)
+
+All readings are for the hours of 11PM to 6PM. A decibel reading is logged every 5 seconds and the L10 reading is calculated for a 10 minute moving window. The sound meter was placed inside a closed window in unit 7A. All measurements in this document have been taken on the same meter placed in the same position.
+
+### Line Plots of L10
+ 
+```{r this_week, echo=FALSE, warning=FALSE}
+# get data for each day this week
+df_monday <- subset(df, df$dateTime > paste("2020-03-10", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-11", "06:00:00", sep = " "))
+df_monday$L10 <- runquantile(df_monday$Value, k=120, probs = .9, endrule = "NA", align = "center")
+
+df_tuesday <- subset(df, df$dateTime > paste("2020-03-10", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-11", "06:00:00", sep = " "))
+df_tuesday$L10 <- runquantile(df_tuesday$Value, k=120, probs = .9, endrule = "NA", align = "center")
+
+df_wednesday <- subset(df, df$dateTime > paste("2020-03-11", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-12", "06:00:00", sep = " "))
+df_wednesday$L10 <- runquantile(df_wednesday$Value, k=120, probs = .9, endrule = "NA", align = "center")
+
+df_thursday <- subset(df, df$dateTime > paste("2020-03-12", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-13", "06:00:00", sep = " "))
+df_thursday$L10 <- runquantile(df_thursday$Value, k=120, probs = .9, endrule = "NA", align = "center")
+
+p0 <- ggplot(df_monday, aes(dateTime, L10)) +
+  geom_line() +
+  labs(title = "L10 Measurement",
+           subtitle = "Night of 3/9/2020 - 3/10/2020",
+           x = "Time",
+           y = "Noise Level (dB)")
+
+p1 <- ggplot(df_tuesday, aes(dateTime, L10)) +
+  geom_line() +
+  labs(title = "L10 Measurement",
+           subtitle = "Night of 3/10/2020 - 3/11/2020",
+           x = "Time",
+           y = "Noise Level (dB)")
+
+p2 <- ggplot(df_wednesday, aes(dateTime, L10)) +
+  geom_line() +
+  labs(title = "L10 Measurement",
+           subtitle = "Night of 3/11/2020 - 3/12/2020",
+           x = "Time",
+           y = "Noise Level (dB)")
+
+p3 <- ggplot(df_thursday, aes(dateTime, L10)) +
+  geom_line() +
+  labs(title = "L10 Measurement",
+           subtitle = "Night of 3/12/2020 - 3/13/2020",
+           x = "Time",
+           y = "Noise Level (dB)")
+
+grid.arrange(p0, p1, p2, p3, nrow = 2)
+```
+
+## Comparison to Earlier Weeks
+
+We can compare these readings to the same set of days in previous weeks. In the following plots we can look at both box plots and density plots for the sound readings from this week (Monday night, Tuesday night, Wednesday night, Thursday night) and the same nights for the week of February 3, February 17, and Feburary 24.
+
+### Boxplot
+
+The boxplot is interprested in the following way:
+
+* the heavy black line in the middle of the color box is the median value. 50% of all measurements fall on either side of this line.
+* the bottom of the box is the value for the 25% percentile
+* the top of the box is the value for the 75% percential
+* the bottom of the line extending downwards from the box is the minimum value
+* the top of the line extending upwards fromthe box is the maximum value
+* the dots above that line are outlier readings
+
+ Looking at the boxplot we can see that the median value is pretty consistent across all four weeks.
+
+```{r comparison, echo=FALSE}
+
+df_thisweek <- subset(df, df$dateTime > paste("2020-03-09", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-11", "06:00:00", sep = " "))
+df_thisweek$L10 <- runquantile(df_thisweek$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_thisweek$comparison <- "This Week"
+
+df_week_feb3 <- subset(df, df$dateTime > paste("2020-02-03", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-07", "06:00:00", sep = " "))
+df_week_feb3$L10 <- runquantile(df_week_feb3$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_week_feb3$comparison <- "Week of 2/3"
+
+df_week_feb17 <- subset(df, df$dateTime > paste("2020-02-17", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-21", "06:00:00", sep = " "))
+df_week_feb17$L10 <- runquantile(df_week_feb17$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_week_feb17$comparison <- "Week of 2/17"
+
+df_week_feb24 <- subset(df, df$dateTime > paste("2020-02-24", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-28", "06:00:00", sep = " "))
+df_week_feb24$L10 <- runquantile(df_week_feb24$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_week_feb24$comparison <- "Week of 2/24"
+
+dfn <- rbind(df_thisweek, df_week_feb3, df_week_feb17, df_week_feb24) 
+
+pa <- ggplot(dfn, aes(x = "", y = Value, fill = comparison)) +
+      geom_boxplot() +
+      labs(title = "Boxplot of Noise Readings", y = "Noise Level (dB)", fill="Group") +
+      theme(legend.position = "bottom")
+pa
+
+```
+
+### Density Plot
+
+The density plot shows the percentage of readings at a given decibel level. If we look at the density plot, we can see that the shape of the distribution is roughly the same for each of the weeks. This week is, if anything, is shifted slightly to the right (there are more louder readings this week).
+```{r, echo=FALSE}
+pb <- ggplot(dfn, aes(Value, fill = comparison)) +
+      geom_density(alpha = 0.5) +
+      labs(title = "Distribution of Noise Readings", x = "Noise Reading (dB)", y = "Frequency (Percent)", fill="Group") +
+      theme(legend.position = "bottom")
+
+pb
+```
+
+
+### L10
+
+One final measurement for comparison is the L10 level (the point at which 90% of all the readings fall below) for each week. The L10 level for each week is:
+
+* This Week: `r quantile(df_thisweek$Value, .9)`
+* Week of 2/3: `r quantile(df_week_feb3$Value, .9)`
+* Week of 2/17: `r quantile(df_week_feb17$Value, .9)`
+* Week of 2/24: `r quantile(df_week_feb24$Value, .9)`
+
