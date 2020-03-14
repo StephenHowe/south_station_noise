@@ -110,17 +110,25 @@ df_thisweek$comparison <- "This Week"
 
 df_week_feb3 <- subset(df, df$dateTime > paste("2020-02-03", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-07", "06:00:00", sep = " "))
 df_week_feb3$L10 <- runquantile(df_week_feb3$Value, k=120, probs = .9, endrule = "NA", align = "center")
-df_week_feb3$comparison <- "Week of 2/3"
+df_week_feb3$comparison <- "Week of 20200203"
+
+df_week_feb10 <- subset(df, df$dateTime > paste("2020-02-10", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-14", "06:00:00", sep = " "))
+df_week_feb10$L10 <- runquantile(df_week_feb10$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_week_feb10$comparison <- "Week of 20200210"
 
 df_week_feb17 <- subset(df, df$dateTime > paste("2020-02-17", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-21", "06:00:00", sep = " "))
 df_week_feb17$L10 <- runquantile(df_week_feb17$Value, k=120, probs = .9, endrule = "NA", align = "center")
-df_week_feb17$comparison <- "Week of 2/17"
+df_week_feb17$comparison <- "Week of 20200217"
 
 df_week_feb24 <- subset(df, df$dateTime > paste("2020-02-24", "23:00:00", sep = " ") & df$dateTime < paste("2020-02-28", "06:00:00", sep = " "))
 df_week_feb24$L10 <- runquantile(df_week_feb24$Value, k=120, probs = .9, endrule = "NA", align = "center")
-df_week_feb24$comparison <- "Week of 2/24"
+df_week_feb24$comparison <- "Week of 20200224"
 
-dfn <- rbind(df_thisweek, df_week_feb3, df_week_feb17, df_week_feb24) 
+df_week_mar2 <- subset(df, df$dateTime > paste("2020-03-02", "23:00:00", sep = " ") & df$dateTime < paste("2020-03-06", "06:00:00", sep = " "))
+df_week_mar2$L10 <- runquantile(df_week_mar2$Value, k=120, probs = .9, endrule = "NA", align = "center")
+df_week_mar2$comparison <- "Week of 20200302"
+
+dfn <- rbind(df_thisweek, df_week_feb3, df_week_feb10, df_week_feb17, df_week_feb24, df_week_mar2) 
 
 pa <- ggplot(dfn, aes(x = "", y = Value, fill = comparison)) +
       geom_boxplot() +
@@ -149,6 +157,8 @@ One final measurement for comparison is the L10 level (the point at which 90% of
 
 * This Week: `r quantile(df_thisweek$Value, .9)`
 * Week of 2/3: `r quantile(df_week_feb3$Value, .9)`
+* Week of 2/10: `r quantile(df_week_feb10$Value, .9)`
 * Week of 2/17: `r quantile(df_week_feb17$Value, .9)`
 * Week of 2/24: `r quantile(df_week_feb24$Value, .9)`
+* Week of 3/2 `r quantile(df_week_mar2$Value, .9)`
 
