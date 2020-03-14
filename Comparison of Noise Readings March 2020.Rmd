@@ -1,7 +1,7 @@
 ---
 title: "Comparison of Noise Readings - March 2020"
 author: "Stephen Howe"
-date: "3/13/2020"
+date: "3/14/2020"
 output: pdf_document
 ---
 
@@ -36,7 +36,7 @@ The following plots show the sound level readings for the following nights:
 * Wednesday (3/11) - Thursday (3/12)
 * Thursday (3/12) - Friday (3/13)
 
-All readings are for the hours of 11PM to 6PM. A decibel reading is logged every 5 seconds and the L10 reading is calculated for a 10 minute moving window. The sound meter was placed inside a closed window in unit 7A. All measurements in this document have been taken on the same meter placed in the same position.
+All readings are for the hours of 11PM to 6AM. A decibel reading is logged every 5 seconds and the L10 reading is calculated for a 10 minute moving window. The sound meter was placed inside a closed window in unit 7A. All measurements in this document have been taken on the same meter placed in the same position. The meter is a REED Instruments SD-4023 Sound Level Meter, Datalogger. It is Type 2 meter.
 
 ### Line Plots of L10
  
