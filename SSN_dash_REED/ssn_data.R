@@ -38,7 +38,7 @@ df <- subset(df, df$time_in_hours < 17 | df$time_in_hours > 23) # remove evening
 df <- df[-6]
 
 # write data to file ####
-write_feather(df, "data/all_readings.feather")
-write.csv(df, "data/all_readings.csv",
+write_feather(df, "SSN_dash_REED/data/all_readings.feather")
+write.csv(df, "SSN_dash_REED/data/all_readings.csv",
           row.names = FALSE,
           quote = TRUE)
