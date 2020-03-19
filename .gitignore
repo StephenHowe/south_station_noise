@@ -8,3 +8,7 @@ events.log
 /rsconnect
 /old_scripts
 /SSN_dash_CID/CID_shiny_app/config.R
+/SSN_dash_CID/CID_exploration.R
+/SSN_dash_CID/CID_scratch.R
+/SSN_dash_CID/CID_shiny_app/apps_alternate
+/SSN_dash_CID/CID_shiny_app/rsconnect
