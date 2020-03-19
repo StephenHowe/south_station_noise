@@ -1,9 +1,10 @@
 ### 717AA Outdoor Noise Monitoring
 ### Stephen Howe
-### 18 March 2020
-### Version 2
+### 19 March 2020
+### Version 3
 
 ### Version Information ####
+# 20200318 V3: set fixed colors for various metrics
 # 20200318 V2: interactive graphs, simplified logic to pull file; tz adjustment
 # 20200317 V1: initial version
 
@@ -107,12 +108,23 @@ server <- function(input, output, session) {
     # subset data based on user inputs
     df_subset <- subset(df_melted, df_melted$Measure %in% input$measurements)
     
+    # set colors
+    cols <- c("LAeq" = "#000000", 
+              "LAF01" = "#E69F00", 
+              "LAF90" = "#56B4E9", 
+              "LAF50" = "#009E73", 
+              "LAF10" = "#F0E442", 
+              "LAF99" = "#0072B2", 
+              "LAFmax" = "#D55E00", 
+              "LAFmin" = "#CC79A7")
+    
     # plot
-    p1 <- ggplot(df_subset, aes(Time, value, color = Measure)) +
+    p1 <- ggplot(df_subset, aes(Time, value, color = factor(Measure))) +
       geom_line() +
       labs(title = "Outside Sounds Readings 717 Atlantic Avenue - 7th Floor",
            y = "Decibels") +
-      scale_x_datetime(date_labels = "%b %d %H:%M")
+      scale_x_datetime(date_labels = "%b %d %H:%M") +
+      scale_colour_manual(values = cols)
     
     ggplotly(p1)
   })
@@ -130,11 +142,7 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
                       
 
+# sources ####
+# http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
 
-#TODO
-# remove file list function [DONE]
-# replace with just constructing the file name from select [DONE]
-# make default graph display based on URL parameter, otherwise default to today
-# change time zone to local [DONE]
-# add in selectables for various measurements
 
