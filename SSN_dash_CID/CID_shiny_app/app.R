@@ -4,7 +4,7 @@
 ### Version 4
 
 ### Version Information ####
-# 20200319 V4: added URL parameters and bookmarking of current app state
+# 20200319 V4: added bookmarking of current app state
 # 20200319 V3: set fixed colors for various metrics
 # 20200318 V2: interactive graphs, simplified logic to pull file; tz adjustment
 # 20200317 V1: initial version
