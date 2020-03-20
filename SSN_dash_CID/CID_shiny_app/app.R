@@ -1,9 +1,10 @@
 ### 717AA Outdoor Noise Monitoring
 ### Stephen Howe
-### 19 March 2020
-### Version 4
+### 20 March 2020
+### Version 5
 
 ### Version Information ####
+# 20200320 V5: deepened colors on graph; 
 # 20200319 V4: added bookmarking of current app state
 # 20200319 V3: set fixed colors for various metrics
 # 20200318 V2: interactive graphs, simplified logic to pull file; tz adjustment
@@ -115,12 +116,12 @@ server <- function(input, output, session) {
     
     # set colors
     cols <- c("LAeq" = "#000000", 
-              "LAF01" = "#E69F00", 
+              "LAF01" = "#D55E00", 
               "LAF90" = "#56B4E9", 
               "LAF50" = "#009E73", 
-              "LAF10" = "#F0E442", 
+              "LAF10" = "#E69F00", 
               "LAF99" = "#0072B2", 
-              "LAFmax" = "#D55E00", 
+              "LAFmax" = "#a2000a", 
               "LAFmin" = "#CC79A7")
     
     # plot
