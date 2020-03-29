@@ -29,15 +29,17 @@ df14 <- read.delim("SSN_dash_REED/data/20200304_to_20200306.txt", sep ="\t", str
 df15 <- read.delim("SSN_dash_REED/data/20200306_to_20200310.txt", sep ="\t", stringsAsFactors = FALSE)
 df16 <- read.delim("SSN_dash_REED/data/20200310_to_20200313.txt", sep ="\t", stringsAsFactors = FALSE)
 df17 <- read.delim("SSN_dash_REED/data/20200313_to_20200320.txt", sep ="\t", stringsAsFactors = FALSE)
-df18 <- read.delim("SSN_dash_REED/data/20200320_to_current.txt", sep ="\t", stringsAsFactors = FALSE)
-df <- rbind(df1, df2, df3, df4, df5, df6, df7, df8, df9, df10, df11, df12, df13, df14, df15, df16, df17, df18)
+df18 <- read.delim("SSN_dash_REED/data/20200320_to_20200323.txt", sep ="\t", stringsAsFactors = FALSE)
+df19 <- read.delim("SSN_dash_REED/data/20200323_to_20200327.txt", sep ="\t", stringsAsFactors = FALSE)
+df20 <- read.delim("SSN_dash_REED/data/20200327_to_20200329.txt", sep ="\t", stringsAsFactors = FALSE)
+df <- rbind(df1, df2, df3, df4, df5, df6, df7, df8, df9, df10, df11, df12, df13, df14, df15, df16, df17, df18, df19, df20)
 
 # remove data outside target time ranges
 df$time_in_hours <- strptime(df$Time, format = "%H:%M:%S")
 df$time_in_hours <- lubridate::hour(df$time_in_hours) + lubridate::minute(df$time_in_hours)/60 
 df <- subset(df, df$time_in_hours < 6 | df$time_in_hours > 8) # remove morning window between 6AM - 8AM
 df <- subset(df, df$time_in_hours < 17 | df$time_in_hours > 23) # remove evening window between 5PM - 11PM
-df <- subset(df, as.Date(df$Date, format = "%m/%d/%y") > (Sys.Date() - 30))
+#df <- subset(df, as.Date(df$Date, format = "%m/%d/%y") > (Sys.Date() - 30))
 df <- df[-6]
 
 # write data to file ####
