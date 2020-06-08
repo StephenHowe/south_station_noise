@@ -161,7 +161,7 @@ server <- function(input, output, session) {
   set_logging_session()
   
   # data ####
-  df <- read.csv("https://raw.githubusercontent.com/StephenHowe/south_station_noise/master/SSN_dash_REED/data/all_readings.csv", stringsAsFactors = FALSE)
+  df <- read.csv("https://raw.githubusercontent.com/StephenHowe/south_station_noise/master/data/all_readings.csv", stringsAsFactors = FALSE)
   #df <- read.csv("data/all_readings.csv", stringsAsFactors = FALSE)
   #df <- read_feather("data/all_readings.feather")
   

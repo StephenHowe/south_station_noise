@@ -5,9 +5,9 @@ account: howetowork
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1685894
-bundleId: 2892342
+bundleId: 2845637
 url: https://howetowork.shinyapps.io/south_station_noise/
-when: 1584494565.43922
+when: 1583198525.43561
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: events.log|scratch.R|ssn_data.R|old_scripts/decibel_readings.R
+ignoredFiles: .RData|decibel_readings.R|events.log|README.md|scratch.R|ssn_data.R
