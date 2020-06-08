@@ -35,20 +35,25 @@ def lambda_handler(event:, context:)
     # try twice to complete yesterday's data
     if 1 <= now.hour && now.hour <= 3
         yesterday = today - SEC_IN_DAY
-        res1 = sync_day(yesterday)
-        etags << res1.etag
+        if (res1 = sync_day(yesterday))
+            etags << res1.etag
+        end
     end
 
     # always update today's data
-    res2 = sync_day(today)
-    etags << res2.etag
+    if (res2 = sync_day(today))
+        etags << res2.etag
+    end
 
-    { statusCode: 200, body: JSON.generate(etags) }
+    retval = { statusCode: 200, body: JSON.generate(etags) }
+    puts retval
+    retval
 end
 
 
 def sync_day(day_time)
     name, csv_old = get_s3_file_by_day(day_time) 
+    res = nil
 
     if !csv_old || csv_old.split("\n").length-1 < BUCK_IN_REPT
         csv_new = generate_csv_for_day(day_time)
@@ -146,7 +151,8 @@ def align_and_group_ranges(ranges, start_time_ref)
         end
     end
 
-    master_buckets
+    # Ignore buckets with a very small number of samples.
+    master_buckets.select {|key,val| val.length > 3}
 end
 
 def format_csv_file(buckets, day_time)
