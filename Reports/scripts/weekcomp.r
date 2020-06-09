@@ -33,8 +33,6 @@ compare_weeks <- function(start_week1, start_week2) {
 
     master_frame$TimeObj = as.POSIXct(master_frame$Time, tz="UTC")
 
-    attr(master_frame$TimeObj, "tzone") = "UTC"
-
     week1fr = subset(master_frame, week1dt_st <= TimeObj & TimeObj < week1dt_end)
     week2fr = subset(master_frame, week2dt_st <= TimeObj & TimeObj < week2dt_end)
 
