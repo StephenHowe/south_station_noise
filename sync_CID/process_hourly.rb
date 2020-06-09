@@ -60,7 +60,7 @@ def sync_day(day_time)
 
         if !csv_old || csv_new.split("\n").length > csv_old.split("\n").length 
             if csv_new.split("\n").length > 1
-                res = S3_BUCKET.object(name).put(body: csv_new)
+                res = S3_BUCKET.object(name).put(body: csv_new, content_type: "text/csv; charset=utf-8")
             end
         end
     end
