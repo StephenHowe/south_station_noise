@@ -6,7 +6,7 @@ SEC_IN_WEEK = 7*SEC_IN_DAY
 SEC_PER_10MIN = 60*10
 
 start_week1 = "2020-05-24 16:00:00 EDT"
-start_week2 = "2020-05-31 16:00:00 EDT"
+start_week2 = "2020-09-13 16:00:00 EDT"
 
 # Compare 2 weeks of L10 measurements.  
 #
@@ -52,7 +52,10 @@ get_S3_data <- function(files_needed) {
     for (file in files_needed) {
         obj = get_object(file, bucket = bucket, as = "text")
         csv = read.csv(text = obj)
-        ret = rbind(ret, csv)
+
+        if (ncol(csv) > 1) {
+            ret = rbind(ret, csv)
+        }
     }
     ret
 }
