@@ -1,12 +1,25 @@
 library("aws.s3")
 library("purrr")
 
-SEC_IN_DAY = 24*60*60
+SEC_IN_HOUR = 60*60
+SEC_IN_DAY = 24*SEC_IN_HOUR
 SEC_IN_WEEK = 7*SEC_IN_DAY
 SEC_PER_10MIN = 60*10
 
 start_week1 = "2020-05-24 16:00:00 EDT"
 start_week2 = "2020-09-13 16:00:00 EDT"
+
+WEEKS = c(
+    "2020-09-13 16:00:00 EDT",
+    "2020-09-20 16:00:00 EDT",
+    "2020-09-27 16:00:00 EDT",
+    "2020-10-04 16:00:00 EDT",
+    "2020-10-11 16:00:00 EDT",
+    "2020-10-18 16:00:00 EDT",
+    "2020-10-25 16:00:00 EDT",
+    "2020-11-01 16:00:00 EDT",
+    "2020-11-08 16:00:00 EDT"
+)
 
 # Compare 2 weeks of L10 measurements.  
 #
@@ -104,13 +117,13 @@ plot_weeks <- function(week1dt_st, week1fr, week2dt_st, week2fr) {
     }
 
     for (idx in 0:7) {
-        weekday1 = format(begin_local_week1 + idx*SEC_IN_DAY, "%A")
-        calday1 = format(begin_local_week1 + idx*SEC_IN_DAY, "%B %d")
+        weekday1 = format(begin_local_week1 + idx*SEC_IN_DAY + SEC_IN_HOUR, "%A")
+        calday1 = format(begin_local_week1 + idx*SEC_IN_DAY + SEC_IN_HOUR, "%B %d")
 
         text(c(start_lab+(12+24*idx)*6, start_lab+(12+24*idx)*6), c(49, 45), labels=c(weekday1, calday1), pos=1)
 
-        weekday2 = format(begin_local_week2 + idx*SEC_IN_DAY, "%A")
-        calday2 = format(begin_local_week2 + idx*SEC_IN_DAY, "%B %d")
+        weekday2 = format(begin_local_week2 + idx*SEC_IN_DAY + SEC_IN_HOUR, "%A")
+        calday2 = format(begin_local_week2 + idx*SEC_IN_DAY + SEC_IN_HOUR, "%B %d")
 
         text(c(start_lab+(12+24*idx)*6, start_lab+(12+24*idx)*6), c(39, 35), labels=c(weekday2, calday2), pos=1, col="blue")
     }
