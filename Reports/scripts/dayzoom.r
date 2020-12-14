@@ -14,10 +14,34 @@ NIGHT_NOISE_DATES = c(
     "2020-11-05 00:00:00 EDT"
 )
 
+NIGHT_NOISE_DATES_2 = c(
+    "2020-11-17 00:00:00 EDT",
+    "2020-11-18 00:00:00 EDT",
+    "2020-11-24 00:00:00 EDT",
+    "2020-11-28 00:00:00 EDT",
+    "2020-12-01 00:00:00 EDT",
+    "2020-12-02 00:00:00 EDT"
+)
+
+NIGHT_NOISE_DATES_3 = c(
+    "2020-09-17 00:00:00 EDT",
+    "2020-10-08 00:00:00 EDT",
+    "2020-11-18 00:00:00 EDT",
+    "2020-11-24 00:00:00 EDT",
+    "2020-11-25 00:00:00 EDT",
+    "2020-11-28 00:00:00 EDT"
+)
+
 MORNING_NOISE_DATES = c(
     "2020-09-19 06:00:00 EDT",
     "2020-10-03 06:00:00 EDT",
     "2020-10-10 06:00:00 EDT"
+)
+
+MORNING_NOISE_DATES_2 = c(
+    "2020-10-03 09:00:00 EDT",
+    "2020-12-01 09:00:00 EDT",
+    "2020-12-03 09:00:00 EDT"
 )
 
 show_nighttime <- function() {
@@ -32,13 +56,16 @@ show_nighttime <- function() {
             ylabel = ""
         }
 
-        show_hours(NIGHT_NOISE_DATES[idx], ylabel, yrange, labels)
+        show_hours(NIGHT_NOISE_DATES_3[idx], ylabel, yrange, labels)
     }
 }
 
 show_morning <- function() {
     par(mfrow=c(1,3))
     labels = c("6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "12 PM")
+
+    labels_2 = c("9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM")
+
     yrange = c(60,90)
 
     for (idx in 1:3) {
@@ -48,7 +75,7 @@ show_morning <- function() {
             ylabel = ""
         }
 
-        show_hours(MORNING_NOISE_DATES[idx], ylabel, yrange, labels)
+        show_hours(MORNING_NOISE_DATES_2[idx], ylabel, yrange, labels_2)
     }    
 }
 
