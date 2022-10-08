@@ -256,7 +256,7 @@ def extract_wls_ranges(raw)
 
     sync_details = [] 
     num_sync.times do
-        if 1 == version 
+        if 1 == version
             sync_details << raw[idx,16].unpack("Q>G")
             idx += 16
         else
