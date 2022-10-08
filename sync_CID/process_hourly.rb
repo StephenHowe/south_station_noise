@@ -250,13 +250,19 @@ def extract_wls_ranges(raw)
     # do a full parse of the wls file, even though we only keep the ranges
     idx = 0
     header = raw[idx,86].unpack("a3CH6CA12CA25CA7CA11Q>Q>N")
+    version = header[1]
     num_sync = header[13]
     idx += 86
 
     sync_details = [] 
     num_sync.times do
-        sync_details << raw[idx,16].unpack("Q>G")
-        idx += 16
+        if 1 == version 
+            sync_details << raw[idx,16].unpack("Q>G")
+            idx += 16
+        else
+            sync_details << raw[idx,20].unpack("Q>Gg")
+            idx += 20
+        end
     end
 
     num_ranges = raw[idx,4].unpack("N").first

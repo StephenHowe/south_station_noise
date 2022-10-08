@@ -13,7 +13,7 @@
 # 
 # 86 byte main header    
 #      0-2    WLS signature, char(3), a3
-#      3      version? always 1, uint(1), C
+#      3      version, uint(1), C
 #      4-6    always 0, unit(3), H6
 #      7      model str len, uint(1), C
 #      8-19   model, char(12), A12
@@ -29,6 +29,7 @@
 # 16*M sync details 
 #      0-7    server time of sync, uint(8), Q>
 #      8-15   drift in ppm, float(8), G
+#      16-19  RSSI (only in v2), float(4), g
 #  4 bytes num ranges, uint(4), N
 # 23 byte range header
 #      0-7   start time of file range, uint(8), Q>
