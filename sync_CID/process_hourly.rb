@@ -100,22 +100,20 @@ def get_range_data_from_cidata(start_time)
     raw = get_hourly_source_data(latest_src_name, start_time, end_time)
     ranges = extract_wls_ranges(raw)
 
-    if ranges.length > 0
-        first_range_start_time = abstime2local(ranges.map {|x| x[:header][0]}.sort.first)
+    first_range_start_time = abstime2local(ranges.map {|x| x[:header][0]}.sort.first) if ranges.length > 0
 
-        if first_range_start_time > start_time
-            # The latest file doesn't cover the day, so get the previous one too.
-            # We assume the last two wlg files cover the time period we care about,
-            # because we don't trust the filename timestamp, and we're not cracking all
-            # the files open to hunt for more.
-            if second_latest_src_name = get_recent_source_filename(2)
-                update_source_file(second_latest_src_name)
+    if first_range_start_time.nil? || first_range_start_time > start_time
+        # The latest file doesn't cover the day, so get the previous one too.
+        # We assume the last two wlg files cover the time period we care about,
+        # because we don't trust the filename timestamp, and we're not cracking all
+        # the files open to hunt for more.
+        if second_latest_src_name = get_recent_source_filename(2)
+            update_source_file(second_latest_src_name)
 
-                raw2 = get_hourly_source_data(second_latest_src_name, start_time, end_time)
-                ranges2 = extract_wls_ranges(raw2)
+            raw2 = get_hourly_source_data(second_latest_src_name, start_time, end_time)
+            ranges2 = extract_wls_ranges(raw2)
 
-                ranges += ranges2
-            end
+            ranges += ranges2
         end
     end
     ranges
@@ -187,7 +185,9 @@ def cfc_api(method, params=nil)
 
     case method
     when "showInstrumentList"
-        url = url_base 
+        url = url_base
+    when "showFile"
+        url = url_base + "&FileName=#{params['FileName']}&FileExt=wls"
     when "updateWLGfile"
         url = url_base + "&FileName=#{params['FileName']}&FileExt=wlg"
     when "createPartialFile"
