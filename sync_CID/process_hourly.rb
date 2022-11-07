@@ -26,6 +26,10 @@ SAMP_IN_BUCK = 10*60
 SEC_IN_DAY   = 24*60*60
 HALF_BUCK    = 5*60
 
+# When true, shift burden of extracting desired ranges to CIDataSolutions servers.
+# Bruno doesn't like this.
+PROCESS_PARTIALS = false
+
 
 def lambda_handler(event:, context:)
     now = Time.now.utc
@@ -154,11 +158,13 @@ def align_and_group_ranges(ranges, start_time_ref)
 end
 
 def format_csv_file(buckets, day_time)
-    results = buckets.map do |idx, val| 
+    buckets_in_day = buckets.filter {|idx,val| 0 <= idx && idx < BUCK_IN_REPT}
+
+    results = buckets_in_day.map do |idx, val|
         num = val.length
 
         [idx, {
-            :Time   => (day_time + idx*10*60).utc.to_s,
+            :Time   => (day_time + idx*SAMP_IN_BUCK).utc.to_s,
             :LAeq   => (10*Math.log10(val.map {|x| 10**(x[2]/10.0)}.reduce(:+)/num)).round(2).to_s,
             :LAFmax => val.map {|x| x[1]}.max.round(2).to_s,
             :LAFmin => val.map {|x| x[3]}.min.round(2).to_s,
@@ -226,10 +232,14 @@ def update_source_file(name)
 end
 
 def get_hourly_source_data(name, start_time, end_time)
-    t1 = local2abstime(start_time)
-    t2 = local2abstime(end_time)
+    if PROCESS_PARTIALS
+        t1 = local2abstime(start_time)
+        t2 = local2abstime(end_time)
 
-    cfc_api("createPartialFile", {"FileName" => name, "StartUTC" => t1, "EndUTC" => t2})
+        cfc_api("createPartialFile", {"FileName" => name, "StartUTC" => t1, "EndUTC" => t2})
+    else
+        cfc_api("showFile", {"FileName" => name})
+    end
 end
 
 
@@ -292,7 +302,13 @@ def extract_wls_ranges(raw)
     # can make invalid file detection a lot better, but if these 3 values scattered across all layers
     # in the file add up to the total file length, then we have confidence we got it right
 
-    unless raw.length == (90 + 16*num_sync + (23+3*16)*ranges.length + 4*num_samps)
+    if 1 == version
+        calc_len = 90 + 16*num_sync + (23+3*16)*ranges.length + 4*num_samps
+    else
+        calc_len = 90 + 20*num_sync + (23+3*16)*ranges.length + 4*num_samps
+    end
+
+    unless raw.length == calc_len
         raise "parsing failed; something is missing #{raw.length} #{num_sync} #{ranges.length} #{num_samps}"
     end
 
