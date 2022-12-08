@@ -57,7 +57,7 @@ compare_weeks <- function(start_week1, start_week2) {
 }
 
 
-# Pulls acoustic data from S3
+# Pulls acoustic data from S3. Make sure correct default region set.
 #
 # @param files_needed A list of S3 object names desired from the bucket.
 # @return A data frame containing all the data across the files.
